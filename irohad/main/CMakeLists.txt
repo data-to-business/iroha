@@ -68,6 +68,8 @@ target_link_libraries(irohad
     logger_manager
     )
 
+target_compile_definitions(irohad PRIVATE -DGIT_REPO_PRETTY_VER="${GIT_REPO_PRETTY_VER}")
+
 add_library(iroha_conf_loader iroha_conf_loader.cpp)
 target_link_libraries(iroha_conf_loader
     iroha_conf_literals

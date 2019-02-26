@@ -95,6 +95,8 @@ static bool validateVerbosity(const char *flagname, const std::string &val) {
 DEFINE_string(verbosity, kLogSettingsFromConfigFile, "Log verbosity");
 DEFINE_validator(verbosity, &validateVerbosity);
 
+
+
 std::promise<void> exit_requested;
 
 logger::LoggerManagerTreePtr getDefaultLogManager() {
@@ -103,6 +105,8 @@ logger::LoggerManagerTreePtr getDefaultLogManager() {
 }
 
 int main(int argc, char *argv[]) {
+  gflags::SetVersionString(GIT_REPO_PRETTY_VER);
+
   // Parsing command line arguments
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
