@@ -6,6 +6,7 @@
 #include "logger/logger_spdlog.hpp"
 
 #include <mutex>
+#include <regex>
 
 #define SPDLOG_FMT_EXTERNAL
 
@@ -33,6 +34,25 @@ namespace {
         : it->second;
   }
 
+  std::string replaceGitHashes(std::string format) {
+    static const std::regex hash_regex{R"(\%([0-9]{0,2})h)"};
+    std::string replaced;
+    std::smatch match;
+    auto pos = format.cbegin();
+    while (std::regex_search(pos, format.cend(), match, hash_regex)) {
+      assert(not match.empty());
+      replaced.append(std::string{pos, match[0].first});
+      std::string git_hash{GIT_REPO_HEAD_HASH};
+      if (match.size() > 1 and match[1].length() > 0) {
+        git_hash.resize(std::stoi(match[1].str()), ' ');
+      }
+      replaced.append(std::move(git_hash));
+      pos = match[0].second;
+    }
+    replaced.append(std::move(format).substr(pos - format.begin()));
+    return replaced;
+  }
+
 }  // namespace
 
 namespace logger {
@@ -46,7 +66,7 @@ namespace logger {
   })();
 
   void LogPatterns::setPattern(LogLevel level, std::string pattern) {
-    patterns_[level] = pattern;
+    patterns_[level] = replaceGitHashes(std::move(pattern));
   }
 
   std::string LogPatterns::getPattern(LogLevel level) const {

@@ -17,6 +17,8 @@ add_dependencies(logger
     spdlog
 )
 
+target_compile_definitions(logger PRIVATE -DGIT_REPO_HEAD_HASH="${GIT_REPO_HEAD_HASH}")
+
 add_library(logger_manager logger_manager.cpp)
 target_link_libraries(logger_manager
     logger
