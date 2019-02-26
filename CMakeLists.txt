@@ -147,6 +147,55 @@ if(PACKAGE_TGZ OR PACKAGE_ZIP OR PACKAGE_RPM OR PACKAGE_DEB)
   include(cmake/release.cmake)
 endif()
 
+# Get the git repo data
+set(GIT_REPO_HEAD_HASH "unknown")
+set(GIT_REPO_PRETTY_VER "version info unavailable")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+  if(NOT GIT_FOUND)
+    find_package(Git QUIET)
+  endif()
+
+  if(GIT_EXECUTABLE)
+    message(STATUS "Git executable: ${GIT_EXECUTABLE}")
+
+    # Get pretty version
+    execute_process(COMMAND
+        "${GIT_EXECUTABLE}"
+        describe --always
+        WORKING_DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+        RESULT_VARIABLE
+        res
+        OUTPUT_VARIABLE
+        GIT_REPO_PRETTY_VER
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(NOT res EQUAL 0)
+      message(STATUS "Error running `git describe': ${res}")
+    endif()
+    message(STATUS "GIT_REPO_PRETTY_VER = ${GIT_REPO_PRETTY_VER}")
+
+    # Get HEAD hash
+    execute_process(COMMAND
+        "${GIT_EXECUTABLE}"
+        rev-parse HEAD
+        WORKING_DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+        RESULT_VARIABLE
+        res
+        OUTPUT_VARIABLE
+        GIT_REPO_HEAD_HASH
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(NOT res EQUAL 0)
+      message(STATUS "Error running `git describe': ${res}")
+    endif()
+    message(STATUS "GIT_REPO_HEAD_HASH = ${GIT_REPO_HEAD_HASH}")
+  else()
+    message(STATUS "Git executable not found!")
+  endif()
+endif()
+
 add_subdirectory(schema)
 add_subdirectory(libs)
 add_subdirectory(irohad)
